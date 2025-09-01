@@ -9,47 +9,49 @@
 
 %% Initialize
 % Vehicle Parameters
-u_max = 0.1; % []
-alpha = 1; % [?]
+u_max = 0.1; % Max thrust value (nd)
+alpha = 1; % Fuel use rate (nd)
  
-a_earth = 1; % [AU]
-nu0_earth = 0; % [rad]
+a_earth = 1; % Semi-major axis (nd)
+nu0_earth = 0; % Initial true anomaly (rad)
 
-a_mars = 1.524; % [AU]
-nu0_mars = pi; % [rad]
+a_mars = 1.524; % Semi-major axis (nd)
+nu0_mars = pi; % Initial true anomaly (rad)
 
-m_0 = 1;
+m_0 = 1; % Spacecraft initial mass (nd)
 
 % All times are nondimensionalized by Earth's mean motion
-tf = 8; % [] arrival time (nondimensionalized)
+tf = 8; % Arrival time (nd)
 
-mu = 1; % [] Sun's gravitaional parameter (nondimensionalized)
+mu = 1; % Sun's gravitaional parameter (nd)
 
-% Problem Parameters
-N = 30; % []
+N = 30; % Number of discretization nodes
 
 %% Create initial conditions
 P_earth_over_P_mars = (a_earth / a_mars) ^ (3/2);
 
+% Planetary position functions
 earth_pos = @(t) a_earth .* [cos(t + nu0_earth); ...
                              sin(t + nu0_earth)];
 mars_pos = @(t) a_mars .* [cos(t * P_earth_over_P_mars + nu0_mars); ...
                            sin(t * P_earth_over_P_mars + nu0_mars)];
 
+% Final true anomaly
 nuf_mars = @(tf) tf * P_earth_over_P_mars + nu0_mars;
 
+% Spacecraft state vectors
 x_0 = [earth_pos(0); v_circ(earth_pos(0), nu0_earth, mu); m_0];
 x_f = [mars_pos(tf); v_circ(mars_pos(tf), nuf_mars(tf), mu)];
 
 %% Finish setting up problem
-
+% Set up discretization
 tspan = [0, tf];
 t_k = linspace(tspan(1), tspan(2), N);
 delta_t = tf / (N - 1);
-
 u_hold = "ZOH";
 Nu = (u_hold == "ZOH") * (N - 1) + (u_hold == "FOH") * N;
 
+% Dimensions
 nx = 5;
 nu = 3;
 np = 0;
@@ -80,7 +82,7 @@ f = @(t, x, u, p) state_equation(x, u, mu, alpha);
 state_convex_constraints = {};
 
 % Convex control constraints
-max_control_constraint = {1:N, @(t, x, u, p) u(3) - u_max};
+max_control_constraint = {1:N, @(t, x, u, p) u(3) - u_max}; % Thrust magnitude must not exceed max thrust
 lcvx_constraint = {1:N, @(t, x, u, p) norm(u(1:2)) - u(3)};
 control_convex_constraints = {max_control_constraint, lcvx_constraint};
 
@@ -97,7 +99,7 @@ nonconvex_constraints = [state_nonconvex_constraints, control_nonconvex_constrai
 
 
 % Terminal boundary conditions
-terminal_bc = @(x, u, p) [x(1:4) - x_f; 0];
+terminal_bc = @(x, u, p) [x(1:4) - x_f; 0]; % Spacecraft must reach correct final position
 
 %% Specify Objective
 min_fuel_objective = @(x, u, p) -x(5, end);%sum(norms(u(1:2, :), 2, 1)) * tf / (N - 1);
