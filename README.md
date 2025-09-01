@@ -6,7 +6,7 @@ Problems covered:
     - Compare against Hohmann transfer
     - Fixed and free final time
     - Assist from launch vehicle
- - 3D translational rocket landing
+ - 3D translational rocket landing (interactive)
     - Introduce lossless convexification 
  - Planar rocket landing
     - State triggered constraints 
