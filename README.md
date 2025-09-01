@@ -1,7 +1,7 @@
 # PSP-ASA-Optimization-Intro
 An introduction/tutorial for optimization techniques in ASA-related problems.
 
-Focusing on direct methods and sequential convex programming in particular
+Focusing on direct methods and sequential convex programming in particular.
 
 Problems covered:
  - 2D Low thrust Earth -> Mars transfer
