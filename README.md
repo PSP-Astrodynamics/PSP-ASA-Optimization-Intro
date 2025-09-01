@@ -12,5 +12,5 @@ Problems covered:
     - State triggered constraints 
 
 Software used:
- - CVX (https://cvxr.com/cvx/)
+ - CVX ([https://cvxr.com/cvx/](https://cvxr.com/cvx/doc/install.html))
  - CasADi?
