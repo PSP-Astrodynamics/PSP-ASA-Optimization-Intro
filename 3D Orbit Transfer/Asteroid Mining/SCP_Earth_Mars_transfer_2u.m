@@ -20,26 +20,46 @@ nu0_mars = pi; % [rad]
 
 m_0 = 1;
 
+AU = 149597898;
+
 % All times are nondimensionalized by Earth's mean motion
-tf = 6; % [] arrival time (nondimensionalized)
+tf = 8; % [] arrival time (nondimensionalized)
 
 mu = 1; % [] Sun's gravitaional parameter (nondimensionalized)
 
 % Problem Parameters
 N = 30; % []
 
+%% Earth data
+a_Earth = 1.49579e8/AU;
+e_Earth = 1.65519e-2;
+inc_Earth = 4.64389e-3;
+Omega_Earth = 1.98956e2;
+omega_Earth = 2.62960e2;
+M_Earth0 = deg2rad(3.58040e2);
+M_Earth = @(t) sqrt(mu/a_Earth^3)*t+M_Earth0;
+E_Earth = @(t) mean_to_eccentric_anomaly(M_Earth(t), e_Earth);
+nu_Earth = @(t) rad2deg(eccentric_to_true_anomaly(E_Earth(t), e_Earth));
+
+%% Asteroid data
+a_ast = 3.073;
+e_ast = 1.177e-1;
+inc_ast = 17.45;
+Omega_ast = 14.03;
+omega_ast = 1.830;
+M_ast0 = deg2rad(305.3);
+M_ast = @(t) sqrt(mu/a_ast^3)*t+M_ast0;
+E_ast = @(t) mean_to_eccentric_anomaly(M_ast(t), e_ast);
+nu_ast = @(t) rad2deg(eccentric_to_true_anomaly(E_ast(t), e_ast));
+
 %% Create initial conditions
-P_earth_over_P_mars = (a_earth / a_mars) ^ (3/2);
+x_keplerian_Earth = @(t) [a_Earth e_Earth inc_Earth*pi/180 Omega_Earth*pi/180 omega_Earth*pi/180 M_Earth(t)]';
+x_cartesian_Earth = @(t) keplerian_to_cartesian(x_keplerian_Earth(t),[],mu);
+x_keplerian_ast = @(t) [a_ast e_ast inc_ast*pi/180 Omega_ast*pi/180 omega_ast*pi/180 M_ast(t)]';
+x_cartesian_ast = @(t) keplerian_to_cartesian(x_keplerian_ast(t),[],mu);
 
-earth_pos = @(t) a_earth .* [cos(t + nu0_earth); ...
-                             sin(t + nu0_earth)];
-mars_pos = @(t) a_mars .* [cos(t * P_earth_over_P_mars + nu0_mars); ...
-                           sin(t * P_earth_over_P_mars + nu0_mars)];
-
-nuf_mars = @(tf) tf * P_earth_over_P_mars + nu0_mars;
-
-x_0 = [earth_pos(0); v_circ(earth_pos(0), nu0_earth, mu); m_0];
-x_f = [mars_pos(tf); v_circ(mars_pos(tf), nuf_mars(tf), mu)];
+x_0 = [x_cartesian_Earth(0); m_0];
+x_f = [x_cartesian_ast(tf)];
 
 %% Finish setting up problem
 
@@ -50,8 +70,8 @@ delta_t = tf / (N - 1);
 u_hold = "ZOH";
 Nu = (u_hold == "ZOH") * (N - 1) + (u_hold == "FOH") * N;
 
-nx = 5;
-nu = 2;
+nx = 7;
+nu = 3;
 np = 0;
 
 initial_guess = "straight line"; % "CasADi" or "straight line"
@@ -59,12 +79,12 @@ initial_guess = "straight line"; % "CasADi" or "straight line"
 % PTR algorithm parameters
 ptr_ops.iter_max = 30;
 ptr_ops.iter_min = 2;
-ptr_ops.Delta_min = 1e-2;
+ptr_ops.Delta_min = 1e-3;
 ptr_ops.w_vc = 1e1;
 ptr_ops.w_tr = ones(1, Nu) * 5e-3;
 ptr_ops.w_tr_p = 1e-1;
 ptr_ops.update_w_tr = false;
-ptr_ops.delta_tol = 2e-3;
+ptr_ops.delta_tol = 2e-2;
 ptr_ops.q = 2;
 ptr_ops.alpha_x = 1;
 ptr_ops.alpha_u = 1;
@@ -73,17 +93,14 @@ ptr_ops.alpha_p = 0;
 scale = false;
 
 %% Get Dynamics
-f = @(t, x, u, p, k) state_equation(x, u, mu, alpha);
-% f = multidynamic_f(f, 1 : (N - 1));
+f = @(t, x, u, p) state_equation(x, u, mu, alpha);
 
 %% Specify Constraints
-min_mass = 0.1;
 % Convex state path constraints
-min_mass_constraint = {N, @(t, x, u, p) min_mass - x(5)};
 state_convex_constraints = {};
 
 % Convex control constraints
-max_control_constraint = {1:N, @(t, x, u, p)  norm(u(1:2)) - u_max};
+max_control_constraint = @(t, x, u, p)  norm(u(1:2)) - u_max;
 control_convex_constraints = {max_control_constraint};
 
 % Combine convex constraints
@@ -99,14 +116,14 @@ nonconvex_constraints = [state_nonconvex_constraints, control_nonconvex_constrai
 
 
 % Terminal boundary conditions
-terminal_bc = @(x, p, x_ref, p_ref) [x(1:4) - x_f; 0];
+terminal_bc = @(x, u, p) [x(1:4) - x_f; 0];
 
 %% Specify Objective
 min_fuel_objective = @(x, u, p) sum(norms(u(1:2, :), 2, 1)) * tf / (N - 1);
 
 %% Create Guess
-AU_guess = interp1(tspan, [a_earth, a_mars]', t_k)';
-nu_guess = interp1(tspan, [nu0_earth, nuf_mars(tf)]', t_k)';
+AU_guess = interp1(tspan, [a_earth, a_ast]', t_k)';
+nu_guess = interp1(tspan, [nu_earth(0), nu_ast(tf)]', t_k)';
 r_guess = [AU_guess .* cos(nu_guess), AU_guess .* sin(nu_guess)]';
 v_guess = v_circ(r_guess, nu_guess', mu);
 m_guess = m_0 * ones([1, N]);
@@ -116,7 +133,11 @@ guess.u = interp1(tspan, zeros(nu, 2)', t_k(1:Nu))' + 1e-3;
 guess.p = [];
 
 %% Construct Problem Object
-prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints, discretization_method="error");
+prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints);
+
+%%
+Delta = calculate_defect(prob, guess.x, guess.u, guess.p);
+norm(Delta)
 
 %% Test Discretization on Initial Guess
 
@@ -125,17 +146,6 @@ prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraint
 x_disc = prob.disc_prop(guess.u, guess.p);
 
 [t_cont, x_cont, u_cont] = prob.cont_prop(guess.u, guess.p);
-%%
-figure
-x_cont_ = x_cont;
-x_cont_(3, :) = 0;
-plot_cartesian_orbit(x_cont_(1:3, :)', "r", 0.4, 0.1)
-axis equal
-
-%%
-figure
-plot(x_disc(1, :), x_disc(2, :)); hold on
-plot(x_cont(1, :), x_cont(2, :), "LineStyle","--"); hold off
 
 %% Solve Problem with PTR
 ptr_sol = ptr(prob, ptr_ops);
@@ -179,10 +189,8 @@ tiledlayout(1, 1, "TileSpacing","compact")
 
 nexttile
 if u_hold == "ZOH"
-    stairs(t_k(1:Nu), vecnorm(u)', LineWidth=1); hold on
     stairs(t_k(1:Nu), u');
 elseif u_hold == "FOH"
-    plot(t_k(1:Nu), vecnorm(u), LineWidth=1); hold on
     plot(t_k(1:Nu), u);
 end
 title("Optimal Control History", Interpreter="latex")
@@ -190,9 +198,8 @@ subtitle(sprintf("Total Fuel Used of %.3f units", fuel(end)))
 xlabel("Time []")
 ylabel("Control Value")
 xlim([0, tf])
-legend("|u|", "u_1", "u_2", location = "south", Orientation="horizontal")
+legend("u_1", "u_2", location = "south", Orientation="horizontal")
 grid on
-hold off
 
 %%
 N_anim = 1 / 0.01;
@@ -263,4 +270,12 @@ function [vvec] = v_circ(rvec, nu, mu)
     r = vecnorm(rvec, 2, 1);
     v = sqrt(mu ./ r);
     vvec = v .* [-sin(nu); cos(nu)];
+end
+
+function [pos] = keplerian2cartesian(a, e, inc, Omega, omega, nu)
+    r = a*(1-e^2)/(1+e*cosd(nu));
+    x=r*((cosd(Omega)*cosd(omega)-sind(Omega)*sind(omega)*cosd(inc))*cosd(nu)+(-cosd(Omega)*sind(omega)-sind(Omega)*cosd(omega)*cosd(inc))*sind(nu));
+    y=r*((sind(Omega)*cosd(omega)+cosd(Omega)*sind(omega)*cosd(inc))*cosd(nu)+(-sind(Omega)*sind(omega)+cosd(Omega)*cosd(omega)*cosd(inc))*sind(nu));
+    z=r*(sind(omega)*sind(inc)*cosd(nu)+cosd(omega)*sind(inc)*sind(nu));
+    pos = [x; y; z];
 end

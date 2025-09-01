@@ -39,11 +39,11 @@ mars_pos = @(t) a_mars .* [cos(t * P_earth_over_P_mars + nu0_mars); ...
 nuf_mars = @(tf) tf * P_earth_over_P_mars + nu0_mars;
 
 x_0 = [earth_pos(0); v_circ(earth_pos(0), nu0_earth, mu); m_0];
-x_f = [mars_pos(tf); v_circ(mars_pos(tf), nuf_mars(tf), mu)];
+x_f = @(tf) [mars_pos(tf); v_circ(mars_pos(tf), nuf_mars(tf), mu)];
 
 %% Finish setting up problem
 
-tspan = [0, tf];
+tspan = [0, 1];
 t_k = linspace(tspan(1), tspan(2), N);
 delta_t = tf / (N - 1);
 
@@ -52,42 +52,41 @@ Nu = (u_hold == "ZOH") * (N - 1) + (u_hold == "FOH") * N;
 
 nx = 5;
 nu = 2;
-np = 0;
-
-initial_guess = "straight line"; % "CasADi" or "straight line"
+np = 1;
 
 % PTR algorithm parameters
-ptr_ops.iter_max = 30;
+ptr_ops.iter_max = 50;
 ptr_ops.iter_min = 2;
-ptr_ops.Delta_min = 1e-2;
-ptr_ops.w_vc = 1e1;
+ptr_ops.Delta_min = 1e-3;
+ptr_ops.w_vc = 1e2;
 ptr_ops.w_tr = ones(1, Nu) * 5e-3;
 ptr_ops.w_tr_p = 1e-1;
 ptr_ops.update_w_tr = false;
-ptr_ops.delta_tol = 2e-3;
+ptr_ops.delta_tol = 1e-2;
 ptr_ops.q = 2;
-ptr_ops.alpha_x = 1;
+ptr_ops.alpha_x = 1e-1;
 ptr_ops.alpha_u = 1;
 ptr_ops.alpha_p = 0;
 
 scale = false;
 
 %% Get Dynamics
-f = @(t, x, u, p, k) state_equation(x, u, mu, alpha);
-% f = multidynamic_f(f, 1 : (N - 1));
+f = @(t, x, u, p) state_equation(x, u, mu, alpha) * p(1);
 
 %% Specify Constraints
-min_mass = 0.1;
 % Convex state path constraints
-min_mass_constraint = {N, @(t, x, u, p) min_mass - x(5)};
 state_convex_constraints = {};
 
 % Convex control constraints
-max_control_constraint = {1:N, @(t, x, u, p)  norm(u(1:2)) - u_max};
+max_control_constraint = @(t, x, u, p) norm(u(1:2)) - u_max;
 control_convex_constraints = {max_control_constraint};
 
+% Convex parameter constraints
+%min_time_constraint = @(t, x, u, p) 40 - p(1); 
+parameter_convex_constraints = {};
+
 % Combine convex constraints
-convex_constraints = [state_convex_constraints, control_convex_constraints];
+convex_constraints = [state_convex_constraints, control_convex_constraints, parameter_convex_constraints];
 
 % Nonconvex state path constraints
 state_nonconvex_constraints = {};
@@ -99,24 +98,30 @@ nonconvex_constraints = [state_nonconvex_constraints, control_nonconvex_constrai
 
 
 % Terminal boundary conditions
-terminal_bc = @(x, p, x_ref, p_ref) [x(1:4) - x_f; 0];
+terminal_bc = @(t, x, u, p) [x(1:4) - x_f(p(1)); 0];
+terminal_bc_linearized = linearize_constraint(terminal_bc, nx, nu, np, "p", 1);
+terminal_bc_linearized = @(x, p, x_ref, p_ref) terminal_bc_linearized(0, x, 0, p, x_ref, 0, p_ref);
 
 %% Specify Objective
-min_fuel_objective = @(x, u, p) sum(norms(u(1:2, :), 2, 1)) * tf / (N - 1);
+min_fuel_objective = @(x, u, p, x_ref, u_ref, p_ref) sum(norms(u(1:2, :), 2, 1)) * p_ref(1) / (N - 1) + sum(norms(u_ref(1:2, :), 2, 1)) * (p(1) - p_ref(1)) / (N - 1);
 
 %% Create Guess
 AU_guess = interp1(tspan, [a_earth, a_mars]', t_k)';
 nu_guess = interp1(tspan, [nu0_earth, nuf_mars(tf)]', t_k)';
 r_guess = [AU_guess .* cos(nu_guess), AU_guess .* sin(nu_guess)]';
-v_guess = v_circ(r_guess, nu_guess', mu);
+v_guess = v_circ_array(r_guess, nu_guess', mu);
 m_guess = m_0 * ones([1, N]);
 
 guess.x = [r_guess; v_guess; m_guess];
 guess.u = interp1(tspan, zeros(nu, 2)', t_k(1:Nu))' + 1e-3;
-guess.p = [];
+guess.p = tf;
 
 %% Construct Problem Object
-prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints, discretization_method="error");
+prob = DeterministicProblem(x_0, x_f, N, u_hold, 1, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc_linearized, nonconvex_constraints = nonconvex_constraints);
+
+%%
+Delta = calculate_defect(prob, guess.x, guess.u, guess.p);
+norm(Delta)
 
 %% Test Discretization on Initial Guess
 
@@ -125,17 +130,6 @@ prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraint
 x_disc = prob.disc_prop(guess.u, guess.p);
 
 [t_cont, x_cont, u_cont] = prob.cont_prop(guess.u, guess.p);
-%%
-figure
-x_cont_ = x_cont;
-x_cont_(3, :) = 0;
-plot_cartesian_orbit(x_cont_(1:3, :)', "r", 0.4, 0.1)
-axis equal
-
-%%
-figure
-plot(x_disc(1, :), x_disc(2, :)); hold on
-plot(x_cont(1, :), x_cont(2, :), "LineStyle","--"); hold off
 
 %% Solve Problem with PTR
 ptr_sol = ptr(prob, ptr_ops);
@@ -147,14 +141,17 @@ end
 
 x = ptr_sol.x(:, :, ptr_sol.converged_i + 1);
 u = ptr_sol.u(:, :, ptr_sol.converged_i + 1);
+p = ptr_sol.p(:, ptr_sol.converged_i + 1);
 
 %%
 
 i = ptr_sol.converged_i + 1;
 [t_cont_sol, x_cont_sol, u_cont_sol] = prob.cont_prop(ptr_sol.u(:, :, i), ptr_sol.p(:, i));
 
-earth_trajectory = earth_pos(t_cont_sol');
-mars_trajectory = mars_pos(t_cont_sol');
+earth_trajectory = earth_pos(t_cont_sol' * p(1));
+mars_trajectory = mars_pos(t_cont_sol' * p(1));
+
+xf = x_f(p(1));
 
 figure
 plot(x_cont_sol(1, :), x_cont_sol(2, :), DisplayName="Minimum Fuel Transfer"); hold on
@@ -162,9 +159,9 @@ quiver(x(1, 1:Nu)',x(2, 1:Nu)',u(1, :)',u(2, :)', 1, DisplayName="Thrust"); hold
 plot(earth_trajectory(1, :), earth_trajectory(2, :), DisplayName="Earth Orbit"); hold on;
 plot(mars_trajectory(1, :), mars_trajectory(2, :), DisplayName="Mars Orbit"); hold on
 scatter(x_0(1), x_0(2), DisplayName="Earth at t = 0"); hold on
-scatter(x_f(1), x_f(2), DisplayName=sprintf("Mars at t = %.4g", tf)); hold off;
+scatter(xf(1), xf(2), DisplayName=sprintf("Mars at t = %.4g", p(1))); hold off;
 title("Minimum Fuel Transfer Between Earth and Mars")
-subtitle(sprintf("For final time of %.4g", tf))
+subtitle(sprintf("For final time of %.4g", p(1)))
 xlabel("X [AU]")
 ylabel("Y [AU]")
 legend(Location="eastoutside")
@@ -172,32 +169,29 @@ grid on
 axis equal
 
 %% Plot optimal Control
-fuel = sum(squeeze(vecnorm(u(1:2, 1:end))) .* tf / (N - 1), 2);
+fuel = sum(squeeze(vecnorm(u(1:2, 1:end))) .* p(1) / (N - 1), 2);
 
 figure
 tiledlayout(1, 1, "TileSpacing","compact")
 
 nexttile
 if u_hold == "ZOH"
-    stairs(t_k(1:Nu), vecnorm(u)', LineWidth=1); hold on
-    stairs(t_k(1:Nu), u');
+    stairs(t_k(1:Nu) * p(1), u');
 elseif u_hold == "FOH"
-    plot(t_k(1:Nu), vecnorm(u), LineWidth=1); hold on
-    plot(t_k(1:Nu), u);
+    plot(t_k(1:Nu) * p(1), u);
 end
 title("Optimal Control History", Interpreter="latex")
 subtitle(sprintf("Total Fuel Used of %.3f units", fuel(end)))
 xlabel("Time []")
 ylabel("Control Value")
-xlim([0, tf])
-legend("|u|", "u_1", "u_2", location = "south", Orientation="horizontal")
+xlim([0, p(1)])
+legend("u_1", "u_2", location = "south", Orientation="horizontal")
 grid on
-hold off
 
 %%
 N_anim = 1 / 0.01;
-t_cont = linspace(0, tf, N_anim);
-x_cont = interp1(t_cont_sol, x_cont_sol', t_cont)';
+t_cont = linspace(0, p(1), N_anim);
+x_cont = interp1(t_cont_sol * p(1), x_cont_sol', t_cont)';
 
 earth_trajectory = earth_pos(t_cont);
 mars_trajectory = mars_pos(t_cont);
@@ -236,7 +230,7 @@ for j = j_0:length(t) % this foor loop generates the animated plot with position
     delete(head);
     delete(mars_head);
 
-    title(sprintf('Earth-Mars Min Fuel Fixed tf Transfer\nTime: %0.0f sec | Mass: %0.2f', t(j),x_cont(5, j)),'Interpreter','Latex','Color','k');
+    title(sprintf('Earth-Mars Min Fuel Transfer\nTime: %0.0f sec | Mass: %0.2f', t(j),x_cont(5, j)),'Interpreter','Latex','Color','k');
     axis equal
     grid on
 end
@@ -260,6 +254,12 @@ function [xdot] = state_equation(x, u, mu, alpha)
 end
 
 function [vvec] = v_circ(rvec, nu, mu)
+    r = norm(rvec);
+    v = sqrt(mu / r);
+    vvec = v .* [-sin(nu); cos(nu)];
+end
+
+function [vvec] = v_circ_array(rvec, nu, mu)
     r = vecnorm(rvec, 2, 1);
     v = sqrt(mu ./ r);
     vvec = v .* [-sin(nu); cos(nu)];

@@ -21,7 +21,7 @@ nu0_mars = pi; % [rad]
 m_0 = 1;
 
 % All times are nondimensionalized by Earth's mean motion
-tf = 6; % [] arrival time (nondimensionalized)
+tf = 8; % [] arrival time (nondimensionalized)
 
 mu = 1; % [] Sun's gravitaional parameter (nondimensionalized)
 
@@ -59,12 +59,12 @@ initial_guess = "straight line"; % "CasADi" or "straight line"
 % PTR algorithm parameters
 ptr_ops.iter_max = 30;
 ptr_ops.iter_min = 2;
-ptr_ops.Delta_min = 1e-2;
+ptr_ops.Delta_min = 1e-3;
 ptr_ops.w_vc = 1e1;
 ptr_ops.w_tr = ones(1, Nu) * 5e-3;
 ptr_ops.w_tr_p = 1e-1;
 ptr_ops.update_w_tr = false;
-ptr_ops.delta_tol = 2e-3;
+ptr_ops.delta_tol = 2e-2;
 ptr_ops.q = 2;
 ptr_ops.alpha_x = 1;
 ptr_ops.alpha_u = 1;
@@ -73,17 +73,14 @@ ptr_ops.alpha_p = 0;
 scale = false;
 
 %% Get Dynamics
-f = @(t, x, u, p, k) state_equation(x, u, mu, alpha);
-% f = multidynamic_f(f, 1 : (N - 1));
+f = @(t, x, u, p) state_equation(x, u, mu, alpha);
 
 %% Specify Constraints
-min_mass = 0.1;
 % Convex state path constraints
-min_mass_constraint = {N, @(t, x, u, p) min_mass - x(5)};
 state_convex_constraints = {};
 
 % Convex control constraints
-max_control_constraint = {1:N, @(t, x, u, p)  norm(u(1:2)) - u_max};
+max_control_constraint = @(t, x, u, p)  norm(u(1:2)) - u_max;
 control_convex_constraints = {max_control_constraint};
 
 % Combine convex constraints
@@ -99,7 +96,7 @@ nonconvex_constraints = [state_nonconvex_constraints, control_nonconvex_constrai
 
 
 % Terminal boundary conditions
-terminal_bc = @(x, p, x_ref, p_ref) [x(1:4) - x_f; 0];
+terminal_bc = @(x, u, p) [x(1:4) - x_f; 0];
 
 %% Specify Objective
 min_fuel_objective = @(x, u, p) sum(norms(u(1:2, :), 2, 1)) * tf / (N - 1);
@@ -116,7 +113,11 @@ guess.u = interp1(tspan, zeros(nu, 2)', t_k(1:Nu))' + 1e-3;
 guess.p = [];
 
 %% Construct Problem Object
-prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints, discretization_method="error");
+prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints);
+
+%%
+Delta = calculate_defect(prob, guess.x, guess.u, guess.p);
+norm(Delta)
 
 %% Test Discretization on Initial Guess
 
@@ -125,17 +126,6 @@ prob = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraint
 x_disc = prob.disc_prop(guess.u, guess.p);
 
 [t_cont, x_cont, u_cont] = prob.cont_prop(guess.u, guess.p);
-%%
-figure
-x_cont_ = x_cont;
-x_cont_(3, :) = 0;
-plot_cartesian_orbit(x_cont_(1:3, :)', "r", 0.4, 0.1)
-axis equal
-
-%%
-figure
-plot(x_disc(1, :), x_disc(2, :)); hold on
-plot(x_cont(1, :), x_cont(2, :), "LineStyle","--"); hold off
 
 %% Solve Problem with PTR
 ptr_sol = ptr(prob, ptr_ops);
@@ -179,10 +169,8 @@ tiledlayout(1, 1, "TileSpacing","compact")
 
 nexttile
 if u_hold == "ZOH"
-    stairs(t_k(1:Nu), vecnorm(u)', LineWidth=1); hold on
     stairs(t_k(1:Nu), u');
 elseif u_hold == "FOH"
-    plot(t_k(1:Nu), vecnorm(u), LineWidth=1); hold on
     plot(t_k(1:Nu), u);
 end
 title("Optimal Control History", Interpreter="latex")
@@ -190,9 +178,8 @@ subtitle(sprintf("Total Fuel Used of %.3f units", fuel(end)))
 xlabel("Time []")
 ylabel("Control Value")
 xlim([0, tf])
-legend("|u|", "u_1", "u_2", location = "south", Orientation="horizontal")
+legend("u_1", "u_2", location = "south", Orientation="horizontal")
 grid on
-hold off
 
 %%
 N_anim = 1 / 0.01;
