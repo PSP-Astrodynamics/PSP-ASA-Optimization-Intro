@@ -74,7 +74,7 @@ scale = false;
 
 %% Get Dynamics
 f = @(t, x, u, p, k) state_equation(x, u, mu, alpha);
-f = multidynamic_f(f, 1 : (N - 1));
+%f = multidynamic_f(f, 1 : (N - 1));
 
 %% Specify Constraints
 % Convex state path constraints
