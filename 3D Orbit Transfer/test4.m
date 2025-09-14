@@ -90,7 +90,7 @@ departure_velocity_constraint = {1, @(t, x, u, p) norm(p(1:3)) - v_max_nd};
 convex_constraints = {max_thrust_constraint, departure_velocity_constraint};
 
 initial_bc = @(x, p) [x(1:3) - x_0(1:3); x(4:6) - p(1:3) - x_0(4:6); x(7) - m0];
-terminal_bc = @(x, p) [x(1:6) - x_f; 0];
+terminal_bc = @(x, p, x_ref, p_ref) [x(1:6) - x_f; 0];
 
 if u_hold == "ZOH"
     min_fuel_objective = @(x, u, p, x_ref, u_ref, p_ref) sum(norms(u, 2, 1)) * delta_t;

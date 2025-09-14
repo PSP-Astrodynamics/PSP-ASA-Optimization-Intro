@@ -8,6 +8,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath(genpath(pwd));
 
+% DOESN'T USE LAUNCH EXCESS VELOCITY
+
 %% Initialize
 % Vehicle Parameters
 u_max = 0.1;
@@ -104,7 +106,7 @@ control_convex_constraints = {max_thrust_constraint};
 convex_constraints = control_convex_constraints;
 
 % Terminal boundary conditions
-terminal_bc = @(x, u, p) [x(1:6) - x_f; 0];
+terminal_bc = @(x, p, x_ref, p_ref) [x(1:6) - x_f; 0];
 
 %% Specify Objective
 if u_hold == "ZOH"
@@ -164,8 +166,10 @@ u = ptr_sol.u(:, :, ptr_sol.converged_i + 1);
 r = x(1:3, :); v= x(4:6, :);
 
 %%
+x_0_opt = x_0 + [0; 0; 0; p(1:3); 0];
+
 i = ptr_sol.converged_i + 1;
-[t_cont_sol, x_cont_sol, u_cont_sol] = problem.cont_prop(ptr_sol.u(:, :, i), ptr_sol.p(:, i));
+[t_cont_sol, x_cont_sol, u_cont_sol] = problem.cont_prop(ptr_sol.u(:, :, i), ptr_sol.p(:, i), x0 = x_0_opt);
 r_cont_sol = x_cont_sol(1:3, :); v_cont_sol = x_cont_sol(4:6, :);
 
 figure
