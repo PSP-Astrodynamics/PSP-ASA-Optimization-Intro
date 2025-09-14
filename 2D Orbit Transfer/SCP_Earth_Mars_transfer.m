@@ -8,6 +8,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Initialize
+
+% Nondimensionalization
+AU = 1.49579151285e8;
+mu_star = 1.32712440018e11; % [km3 / s2]
+l_star = AU; % [km] one AU
+m_star = 3000; % [kg] - max initial ship mass
+a_star = mu_star / l_star ^ 2; % [km / s2]
+t_star = sqrt(l_star ^ 3 / mu_star);
+v_star = sqrt(mu_star/l_star);
+
+year_to_sec = 86400.0 * 365.25;
+
 % Vehicle Parameters
 u_max = 0.1; % Max thrust value (nd)
 alpha = 1; % Fuel use rate (nd)
@@ -21,7 +33,7 @@ nu0_mars = pi; % Initial true anomaly (rad)
 m_0 = 1; % Spacecraft initial mass (nd)
 
 % All times are nondimensionalized by Earth's mean motion
-tf = 8; % Arrival time (nd)
+tf = 1 * year_to_sec / t_star; % Arrival time (nd)
 
 mu = 1; % Sun's gravitaional parameter (nd)
 
@@ -99,7 +111,7 @@ nonconvex_constraints = [state_nonconvex_constraints, control_nonconvex_constrai
 
 
 % Terminal boundary conditions
-terminal_bc = @(x, u, p) [x(1:4) - x_f; 0]; % Spacecraft must reach correct final position
+terminal_bc = @(x, p, x_ref, p_ref) [x(1:4) - x_f; 0]; % Spacecraft must reach correct final position
 
 %% Specify Objective
 min_fuel_objective = @(x, u, p) -x(5, end);%sum(norms(u(1:2, :), 2, 1)) * tf / (N - 1);

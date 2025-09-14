@@ -47,7 +47,7 @@ tspan = [0, tf];
 t_k = linspace(tspan(1), tspan(2), N);
 delta_t = tf / (N - 1);
 
-u_hold = "ZOH";
+u_hold = "FOH";
 Nu = (u_hold == "ZOH") * (N - 1) + (u_hold == "FOH") * N;
 
 nx = 5;

@@ -100,7 +100,7 @@ state_nonconvex_constraints = {glideslope_STC_constraint};
 nonconvex_constraints = [state_nonconvex_constraints];
 
 % Terminal boundary conditions
-terminal_bc = @(x, u, p) [x(1:6, :) - x_f; 0];
+terminal_bc = @(x, p, x_ref, p_ref) [x(1:6, :) - x_f; 0];
 
 %% Specify Objective
 min_fuel_angular_velocity_objective = @(x, u, p) sum(u(3, :) / T_max + x(6, 1:Nu) .^ 2) * delta_t;

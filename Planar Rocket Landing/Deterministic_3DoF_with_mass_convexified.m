@@ -116,7 +116,7 @@ end
 sl_guess.x(7, :) = log(sl_guess.x(7, :));
 sl_guess.u = sl_guess.u .* exp(-sl_guess.x(7, 1:Nu));
 
-CasADi_sol = CasADi_solve_mass_convexified(x_0, sl_guess.x, sl_guess.u, vehicle, N, delta_t, glideslope_angle_max);%
+% CasADi_sol = CasADi_solve_mass_convexified(x_0, sl_guess.x, sl_guess.u, vehicle, N, delta_t, glideslope_angle_max);%
 
 if initial_guess == "straight line"
     guess = sl_guess;
@@ -198,14 +198,14 @@ yscale("log")
 title("Defect Norm vs Iteration")
 grid on
 
-%%
-Js = [ptr_sol.info.J];
-(Js(end) - CasADi_sol.objective) / CasADi_sol.objective * 100
+% %%
+% Js = [ptr_sol.info.J];
+% (Js(end) - CasADi_sol.objective) / CasADi_sol.objective * 100
 
 %%
 figure
 plot(0:ptr_sol.converged_i, [prob_3DoF.objective(prob_3DoF.guess.x, prob_3DoF.guess.u, prob_3DoF.guess.p), [ptr_sol.info.J]]); hold on
-yline(CasADi_sol.objective); hold off
+%yline(CasADi_sol.objective); hold off
 xlabel("PTR Iteration")
 ylabel("\Delta V [km / s]")
 legend("PTR Iterations", "CasADi Solution", location = "southeast")
@@ -231,19 +231,19 @@ plot_3DoFc_trajectory(t_cont_sol, x_cont_sol, u_cont_sol, glideslope_angle_max, 
 
 figure
 plot_3DoFc_trajectory(t_k, ptr_sol.x(:, :, i), ptr_sol.u(:, :, i), glideslope_angle_max, gimbal_max, T_min, T_max, step = 1)
-%%
+% %%
+% figure
+% comparison_plot_3DoF_trajectory({guess.x, x_cont_sol, ptr_sol.x(:, :, i), CasADi_sol.x}, ["Guess", "Continuous Propagation", "Solution Output", "CasADi"], glideslope_angle_max, linestyle = [":", "-", "--", "-"], title = "3DoF Solution Comparison")
+% %%
 figure
-comparison_plot_3DoF_trajectory({guess.x, x_cont_sol, ptr_sol.x(:, :, i), CasADi_sol.x}, ["Guess", "Continuous Propagation", "Solution Output", "CasADi"], glideslope_angle_max, linestyle = [":", "-", "--", "-"], title = "3DoF Solution Comparison")
-%%
-figure
-comparison_plot_3DoF_trajectory({guess.x, x_cont_sol, CasADi_sol.x}, ["Guess", "PTR", "CasADi"], glideslope_angle_max, linestyle = [":", "-", "-"], title = "", STC_glideslope_angle_height = [glideslope_STC_angle, glideslope_STC_trigger_height])
+comparison_plot_3DoF_trajectory({guess.x, x_cont_sol}, ["Guess", "PTR"], glideslope_angle_max, linestyle = [":", "-"], title = "", STC_glideslope_angle_height = [glideslope_STC_angle, glideslope_STC_trigger_height])
 
 %%
 figure
 comparison_plot_3DoFc_time_histories({t_k, t_cont_sol, t_k}, {guess.x, x_cont_sol, ptr_sol.x(:, :, i)}, {guess.u, u_cont_sol, ptr_sol.u(:, :, i)}, ["Guess", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Solution")
 
-%%
-comparison_plot_3DoFc_time_histories({t_k, t_cont_sol, t_k}, {CasADi_sol.x, x_cont_sol, ptr_sol.x(:, :, i)}, {CasADi_sol.u, u_cont_sol, ptr_sol.u(:, :, i)}, ["CasADi", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Solution")
+% %%
+% comparison_plot_3DoFc_time_histories({t_k, t_cont_sol, t_k}, {CasADi_sol.x, x_cont_sol, ptr_sol.x(:, :, i)}, {CasADi_sol.u, u_cont_sol, ptr_sol.u(:, :, i)}, ["CasADi", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Solution")
 
 %%
 t_iters = {};
