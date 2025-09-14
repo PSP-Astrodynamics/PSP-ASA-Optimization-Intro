@@ -68,7 +68,7 @@ initial_guess = "straight line";
 
 ptr_ops.iter_max = 80;
 ptr_ops.iter_min = 2;
-ptr_ops.Delta_min = 1e-5;
+ptr_ops.Delta_min = 1e-4;
 ptr_ops.w_vc = 1e4;
 ptr_ops.w_tr = ones(1, Nu) * 5e-3;
 ptr_ops.w_tr_p = 1e-2 * ones(1, np);
