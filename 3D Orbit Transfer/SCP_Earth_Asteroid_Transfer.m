@@ -1,13 +1,16 @@
 addpath(genpath(pwd));
 
+% NEED TO UPDATE TO USE ACTUAL SPACECRAFT MASS/ISP/THRUST AS GTOC SINCE THE
+% CVXPyGEN SOLVER WAS BUILT FOR THAT
+
 %% Initialize
 u_max = 0.1;
 mu = 1;
 mu_dim = 1.327e11;
 AU = 149597898;
-m0 = 1;
-tf = 15;
-N = 30;
+m0 = 2;
+tf = 5;
+N = 15; % Current CVXPyGEN solver built for N = 15 and FOH
 velocity_nd = sqrt(mu_dim/AU);
 
 %% Earth data
@@ -56,10 +59,10 @@ tspan = [0, tf];
 t_k = linspace(tspan(1), tspan(2), N);
 delta_t = t_k(2) - t_k(1);
 
-u_hold = "ZOH";
+u_hold = "FOH";
 Nu = (u_hold == "ZOH") * (N - 1) + (u_hold == "FOH") * N;
 
-parser = "CVX";
+parser = "CVXPyGEN";
 nx = 7;
 nu = 3;
 np = 3;
@@ -110,7 +113,7 @@ guess.x = [r_guess; v_guess; m_guess];
 guess.u = interp1(tspan, ones(3, 2)' * 1e-5, t_k(1:Nu))';
 guess.p = [0; 0; 0];
 
-problem = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, initial_bc = initial_bc, terminal_bc = terminal_bc, integration_tolerance = 1e-12, discretization_method = "state", N_sub = 1);
+problem = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, initial_bc = initial_bc, terminal_bc = terminal_bc, integration_tolerance = 1e-12, discretization_method = "error", N_sub = 1, Name = "Earth2Ast_fixed");
 
 [problem, Delta_disc] = problem.discretize(guess.x, guess.u, guess.p);
 ptr_sol = ptr(problem, ptr_ops, parser);
@@ -148,17 +151,20 @@ legend('Spacecraft', "", "Thrust", 'Guess', "", 'Earth', "", 'Asteroid', "", "St
 figure
 tiledlayout(1, 2)
 
+Nu_cont = (u_hold == "ZOH") * (numel(t_cont_sol) - 1) + (u_hold == "FOH") * numel(t_cont_sol);
+
 nexttile
-plot(t_cont_sol(1:end - 1), u_cont_sol(1:3,:)); hold on
-plot(t_cont_sol(1:end - 1), vecnorm(u_cont_sol(1:3,:)))
+plot(t_cont_sol(1:Nu_cont), u_cont_sol(1:3,1:Nu_cont)); hold on
+plot(t_cont_sol(1:Nu_cont), vecnorm(u_cont_sol(1:3,1:Nu_cont)))
 title("Control")
 xlabel("Time")
+grid on
 
 nexttile
 plot(t_cont_sol(1:end), x_cont_sol(7, :))
 title("Mass")
 xlabel("Time")
-
+grid on
 
 %% Helper
 function [v_guess] = v_circ(r_guess, nu_guess, mu)

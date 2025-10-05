@@ -21,7 +21,6 @@ m_0/(3*h*10^3)*((h*10^3)^2-3*(h*10^3)*(L*10^3)+3*(L*10^3)^2) % [kg m2] ASSUMING 
 gimbal_max = deg2rad(6); % [rad]
  
 vehicle = Vehicle(m_0, L, L * 3, gimbal_max, T_min, T_max, I = I, alpha = alpha);
-%vehicle_big_gimbs = Vehicle(m_dry, L, L * 3, deg2rad(20), T_min, T_max, I = I, alpha = alpha);
 
 % Problem Parameters
 tf = 35; % [s]
@@ -49,7 +48,7 @@ u_hold = "FOH";
 Nu = (u_hold == "ZOH") * (N - 1) + (u_hold == "FOH") * N;
 
 initial_guess = "straight line"; % "CasADi" or "straight line" or "screw"
-parser = "CVX";
+parser = "CVXPY";
 
 % PTR algorithm parameters
 ptr_ops.iter_max = 25;
@@ -122,40 +121,36 @@ elseif u_hold == "FOH"
 end
 guess.p = sl_guess.p;
 
-figure
+% figure
 %plot_3DoFc_trajectory(t_k, sl_guess.x, sl_guess.u, glideslope_angle_max, gimbal_max, T_min, T_max)
 
-figure
+% figure
 %plot_3DoFc_time_histories(t_k, sl_guess.x, sl_guess.u)
 
-figure
+% figure
 %plot_3DoFc_trajectory(t_k, guess.x, guess.u, glideslope_angle_max, gimbal_max, T_min, T_max, step = 1)
 
-figure
+% figure
 %plot_3DoFc_time_histories(t_k, guess.x, guess.u)
 
 %% Construct Problem Object
-prob_3DoF = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints, integration_tolerance = 1e-8, discretization_method = "error", N_sub = 1);
+prob_3DoF = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, terminal_bc = terminal_bc, nonconvex_constraints = nonconvex_constraints, integration_tolerance = 1e-8, discretization_method = "error", N_sub = 1, Name = "Deterministic_3DoF_with_mass_constant");
 
 %% Test Discretization on Initial Guess
 
 [prob_3DoF, Delta_disc] = prob_3DoF.discretize(guess.x, guess.u, guess.p);
 
+prob_3DoF.params = [T_min, T_max, glideslope_angle_max, gimbal_max, diag(prob_3DoF.scaling.S_x)', diag(prob_3DoF.scaling.S_u)', prob_3DoF.scaling.c_x', prob_3DoF.scaling.c_u'];
+
 x_disc = prob_3DoF.disc_prop(guess.u, guess.p);
 
 [t_cont, x_cont, u_cont] = prob_3DoF.cont_prop(guess.u, guess.p);
-
-figure
-%comparison_plot_3DoF_trajectory({guess.x, x_cont, x_disc}, ["Guess", "Continuous Propagation", "Discrete Propagation"], glideslope_angle_max, linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Initial Guess")
-
-figure
-%comparison_plot_3DoFc_time_histories({t_k, t_cont, t_k}, {guess.x, x_cont, x_disc}, {guess.u, u_cont, guess.u}, ["Guess", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Initial Guess")
-
-%%
-prob_3DoF = DeterministicProblem(x_0, x_f, N, u_hold, tf, f, guess, convex_constraints, min_fuel_objective, scale = scale, nonconvex_constraints = nonconvex_constraints, terminal_bc = terminal_bc, integration_tolerance = 1e-12, discretization_method = "error", N_sub = 1);
-prob_3DoF.vehicle = vehicle;
-
-[prob_3DoF, Delta_disc] = prob_3DoF.discretize(guess.x, guess.u, guess.p);
+% 
+% figure
+% comparison_plot_3DoF_trajectory({guess.x, x_cont, x_disc}, ["Guess", "Continuous Propagation", "Discrete Propagation"], glideslope_angle_max, linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Initial Guess")
+% 
+% figure
+% comparison_plot_3DoF_time_histories({t_k, t_cont, t_k}, {guess.x, x_cont, x_disc}, {guess.u, u_cont, guess.u}, ["Guess", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Initial Guess")
 
 %% Solve Problem with PTR
 ptr_sol_vc = ptr(prob_3DoF, ptr_ops, parser);
@@ -231,8 +226,8 @@ figure
 comparison_plot_3DoF_trajectory({guess.x, x_cont_sol}, ["Guess", "PTR"], glideslope_angle_max, linestyle = [":", "-"], title = "", STC_glideslope_angle_height = [glideslope_STC_angle, glideslope_STC_trigger_height])
 
 %%
-figure
-comparison_plot_3DoFc_time_histories({t_k, t_cont_sol, t_k}, {guess.x, x_cont_sol, ptr_sol.x(:, :, i)}, {guess.u, u_cont_sol, ptr_sol.u(:, :, i)}, ["Guess", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Solution")
+% figure
+% comparison_plot_3DoFc_time_histories({t_k, t_cont_sol, t_k}, {guess.x, x_cont_sol, ptr_sol.x(:, :, i)}, {guess.u, u_cont_sol, ptr_sol.u(:, :, i)}, ["Guess", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Solution")
 
 % %%
 % comparison_plot_3DoFc_time_histories({t_k, t_cont_sol, t_k}, {CasADi_sol.x, x_cont_sol, ptr_sol.x(:, :, i)}, {CasADi_sol.u, u_cont_sol, ptr_sol.u(:, :, i)}, ["CasADi", "Cont", "Disc"], linestyle = [":", "-", "--"], title = "Continuous vs Discrete Propagation of Solution")
@@ -250,9 +245,9 @@ for i = 1:ptr_sol.converged_i
 end
 figure
 comparison_plot_3DoF_trajectory(x_iters, "iter " + string(1:ptr_sol.converged_i), glideslope_angle_max, linestyle = linestyle, title = "Solution vs Iteration")
-
-figure 
-comparison_plot_3DoFc_time_histories(t_iters, x_iters, u_iters, "iter " + string(1:ptr_sol.converged_i), linestyle = linestyle, title = "Solution vs Iteration")
+% 
+% figure 
+% comparison_plot_3DoFc_time_histories(t_iters, x_iters, u_iters, "iter " + string(1:ptr_sol.converged_i), linestyle = linestyle, title = "Solution vs Iteration")
 
 %%
 figure
