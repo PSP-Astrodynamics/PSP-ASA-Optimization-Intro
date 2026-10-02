@@ -98,7 +98,7 @@ control_nonconvex_constraints = {};
 nonconvex_constraints = [state_nonconvex_constraints, control_nonconvex_constraints];
 
 % Terminal boundary conditions
-terminal_bc = @(x, u, p) [x(1:4) - x_f; 0]; % Spacecraft must reach correct final position/velocity
+terminal_bc = @(x, p, x_ref, p_ref) [x(1:4) - x_f; 0]; % Spacecraft must reach correct final position/velocity
 
 %% Specify Objective
 min_fuel_objective = @(x, u, p) -x(5, end);%sum(norms(u(1:2, :), 2, 1)) * tf / (N - 1);
