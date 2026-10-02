@@ -1,0 +1,10 @@
+^C:\USERS\THATF\ONEDRIVE\DOCUMENTS\ASA\PSP-ASA-OPTIMIZATION-INTRO\PLANAR ROCKET LANDING\CVXPYGEN EXAMPLE\EXAMPLE_ECOS\C\BUILD\CMAKEFILES\AEB9ACBA26FE2FBA5877D4D2DBED51ED\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/thatf/OneDrive/Documents/ASA/PSP-ASA-Optimization-Intro/Planar Rocket Landing/CVXPyGEN Example/example_ECOS/c" "-BC:/Users/thatf/OneDrive/Documents/ASA/PSP-ASA-Optimization-Intro/Planar Rocket Landing/CVXPyGEN Example/example_ECOS/c/build" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/thatf/OneDrive/Documents/ASA/PSP-ASA-Optimization-Intro/Planar Rocket Landing/CVXPyGEN Example/example_ECOS/c/build/cvxpygen.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

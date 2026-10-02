@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_ECOS\c\build\CMakeFiles\aeb9acba26fe2fba5877d4d2dbed51ed\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C6BC361B-8D97-31C7-B9D0-5192C597A989}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

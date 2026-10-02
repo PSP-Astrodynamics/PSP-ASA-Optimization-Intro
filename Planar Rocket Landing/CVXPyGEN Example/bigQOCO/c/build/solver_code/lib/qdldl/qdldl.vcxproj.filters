@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\bigQOCO\c\solver_code\lib\qdldl\src\qdldl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\bigQOCO\c\solver_code\lib\qdldl\include\qdldl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\bigQOCO\c\solver_code\lib\qdldl\include\qdldl_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\bigQOCO\c\solver_code\lib\qdldl\include\qdldl_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\bigQOCO\c\solver_code\lib\qdldl\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6B577A43-0F7D-3ABB-A0B1-765797D75BB3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{ADAA128E-7F1A-32CC-A25D-0EE75FEBE77D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

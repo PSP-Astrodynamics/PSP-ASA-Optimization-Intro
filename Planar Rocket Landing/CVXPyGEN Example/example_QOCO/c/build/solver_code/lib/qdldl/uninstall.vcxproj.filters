@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\build\CMakeFiles\a59c79d1b1620a9aeda6e6a865b06815\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\qdldl\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\build\solver_code\lib\qdldl\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{954AD13E-75B7-32F9-B116-348AA61AFB17}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

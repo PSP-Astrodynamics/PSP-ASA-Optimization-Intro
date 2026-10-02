@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_aat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_control.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_defaults.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_dump.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_info.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_order.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_post_tree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_postorder.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_preprocess.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_valid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_version.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\SuiteSparse_config.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\amd_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\SuiteSparse_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\solver_code\lib\amd\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{488477B0-A171-3CE3-8E21-8DC98106D1F6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{1500B44A-C98F-3813-B516-686EE627A070}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

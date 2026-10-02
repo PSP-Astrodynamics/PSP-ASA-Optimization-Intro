@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\example_QOCO\c\build\CMakeFiles\06c2917904e185f7774386e6df1c391b\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{954AD13E-75B7-32F9-B116-348AA61AFB17}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

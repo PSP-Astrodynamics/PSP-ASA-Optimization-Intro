@@ -1,0 +1,1 @@
+C:\Users\thatf\OneDrive\Documents\ASA\PSP-ASA-Optimization-Intro\Planar Rocket Landing\CVXPyGEN Example\bigQOCO\c\build\solver_code\lib\amd\amd.dir\Release\amd.lib
