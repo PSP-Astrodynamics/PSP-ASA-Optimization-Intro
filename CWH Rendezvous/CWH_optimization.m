@@ -70,7 +70,7 @@ u_ref = zeros([nu, Nu]);
 p_ref = zeros([np, 1]); % Parameters are constants and do not depend on time
 
 %% Discretization
-[A_k, B_k, E_k, c_k] = discretize_dynamics_ZOH(f, A, B, E, c, N, t_k, x_ref, u_ref, p_ref, tolerances);
+[A_k, B_k, E_k, c_k, Delta] = discretize_dynamics_ZOH(f, A, B, E, c, N, t_span, x_ref, u_ref, p_ref, tolerances);
 
 %% Solve with CVX
 cvx_begin
