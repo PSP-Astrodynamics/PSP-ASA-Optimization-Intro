@@ -38,7 +38,7 @@ w_f = 0; % [rad / s]
 x_f = [r_f; v_f; theta_f; w_f];
 
 % Problem Parameters
-tf = 60; % [s]
+tf = 6; % [s]
 N = 30; % []
 glideslope_max = deg2rad(45); % [rad]
 
