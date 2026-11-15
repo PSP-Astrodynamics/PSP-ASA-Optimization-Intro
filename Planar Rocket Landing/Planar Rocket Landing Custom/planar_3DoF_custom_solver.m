@@ -56,14 +56,14 @@ tolerances = odeset(RelTol = integration_tolerance, AbsTol = integration_toleran
 Nu = N - 1;
 
 % PTR algorithm parameters
-ptr_ops.iter_max = 25;
-ptr_ops.iter_min = 2;
-ptr_ops.Delta_min = 4e-5;
-ptr_ops.w_vc = 1e4;
-ptr_ops.w_tr = 1e-1;
-ptr_ops.delta_tol = 5e-3;
-ptr_ops.alpha_x = 1;
-ptr_ops.alpha_u = 1e-6;
+ptr_ops.iter_max = 25; % Maximum PTR iterations
+ptr_ops.iter_min = 2; % Minimum PTR iterations
+ptr_ops.Delta_min = 4e-5; % Convergence tolerance for sum total defects (difference between predicted and integrated final state) over each time interval
+ptr_ops.w_vc = 1e4; % Virtual control penalty weight
+ptr_ops.w_tr = 1e-1; % Trust region penalty weight
+ptr_ops.delta_tol = 5e-3; % Convergence tolerance for change of new solution from reference solution
+ptr_ops.alpha_x = 1; % State trust region multiplier
+ptr_ops.alpha_u = 1e-6; % Control trust region multiplier
 
 %% Specify Objective
 objective = @(x, u) sum(norms(u, 2, 1) * delta_t) / T_max;
