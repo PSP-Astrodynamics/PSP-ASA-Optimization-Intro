@@ -29,13 +29,15 @@ for c = 1:Nc
     plot(x{c}(1, :), x{c}(2, :), LineWidth = 2, LineStyle = options.linestyle(c)); hold on
 end
 line([x_lim(1), 0, x_lim(2)], abs([x_lim(1), 0, x_lim(2)]) / tan(glideslope_angle), 'Color', 'k', 'LineStyle', '--'); hold on
+legend_names = [names, "Glideslope"];
 if ~isempty(options.STC_glideslope_angle_height)
     line([-options.STC_glideslope_angle_height(2), 0, options.STC_glideslope_angle_height(2)] * tan(options.STC_glideslope_angle_height(1)), [options.STC_glideslope_angle_height(2), 0, options.STC_glideslope_angle_height(2)], Color = 'k', LineStyle = '--');
     yline(options.STC_glideslope_angle_height(2), LineStyle="--")
+    legend_names = [legend_names, "STC Glideslope", "STC Glideslope Trigger"];
 end
 hold off
 title(options.title)
-legend([names, "Glideslope", "STC Glideslope", "STC Glideslope Trigger"], Location="eastoutside", Orientation="vertical")
+legend(legend_names, Location="eastoutside", Orientation="vertical")
 xlabel("X [km]")
 ylabel("Y [km]")
 axis equal
