@@ -33,8 +33,8 @@ line([x_lim(1), 0, x_lim(2)], abs([x_lim(1), 0, x_lim(2)]) / tan(glideslope_angl
 quiver(x(1, 1:options.step:Nu), x(2, 1:options.step:Nu), -u_N(1, 1:options.step:end), -u_N(2, 1:options.step:end), ShowArrowHead = "off", color = "r", AutoScaleFactor=0.4)
 title(options.title)
 legend("", "Glideslope", "Thrust", Location="southoutside", Orientation="horizontal")
-xlabel("X [km]")
-ylabel("Y [km]")
+xlabel("X [m]")
+ylabel("Y [m]")
 axis equal
 grid on
 xlim(x_lim)
